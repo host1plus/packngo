@@ -44,6 +44,7 @@ func (p Project) String() string {
 type ProjectCreateRequest struct {
 	Name            string `json:"name"`
 	PaymentMethodID string `json:"payment_method_id,omitempty"`
+	OrganizationID  string `json:"-"`
 }
 
 func (p ProjectCreateRequest) String() string {
@@ -93,9 +94,16 @@ func (s *ProjectServiceOp) Get(projectID string) (*Project, *Response, error) {
 
 // Create creates a new project
 func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project, *Response, error) {
+	var path string
+	if createRequest.OrganizationID != "" {
+		path = fmt.Sprintf("%s/%s%s", organizationBasePath, createRequest.OrganizationID, projectBasePath)
+	} else {
+		path = projectBasePath
+	}
+
 	project := new(Project)
 
-	resp, err := s.client.DoRequest("POST", projectBasePath, createRequest, project)
+	resp, err := s.client.DoRequest("POST", path, createRequest, project)
 	if err != nil {
 		return nil, resp, err
 	}

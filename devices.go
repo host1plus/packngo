@@ -20,6 +20,8 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
+	Reinstall(string) (*Response, error)
+	Rescue(string) (*Response, error)
 }
 
 type devicesRoot struct {
@@ -90,6 +92,8 @@ type DeviceCreateRequest struct {
 	SpotInstance          bool       `json:"spot_instance,omitempty"`
 	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
+	ProjectSSHKeys        []string   `json:"project_ssh_keys,omitempty"`
+	UserSSHKeys           []string   `json:"user_ssh_keys,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
@@ -233,4 +237,19 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	action := lockDeviceType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
+}
+
+// Reinstall reinstalls an OS on a device
+func (s *DeviceServiceOp) Reinstall(deviceID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	action := &DeviceActionRequest{Type: "reinstall"}
+
+	return s.client.DoRequest("POST", path, action, nil)
+}
+
+func (s *DeviceServiceOp) Rescue(deviceID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	action := &DeviceActionRequest{Type: "rescue"}
+
+	return s.client.DoRequest("POST", path, action, nil)
 }
