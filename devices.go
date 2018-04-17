@@ -20,7 +20,7 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
-	Reinstall(string) (*Response, error)
+	Reinstall(string, string) (*Response, error)
 	Rescue(string) (*Response, error)
 }
 
@@ -114,6 +114,7 @@ func (d DeviceCreateRequest) String() string {
 // DeviceActionRequest type used to execute actions on devices
 type DeviceActionRequest struct {
 	Type string `json:"type"`
+	OS   string `json:"operating_system,omitempty"`
 }
 
 func (d DeviceActionRequest) String() string {
@@ -240,9 +241,9 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 }
 
 // Reinstall reinstalls an OS on a device
-func (s *DeviceServiceOp) Reinstall(deviceID string) (*Response, error) {
+func (s *DeviceServiceOp) Reinstall(deviceID, os string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
-	action := &DeviceActionRequest{Type: "reinstall"}
+	action := &DeviceActionRequest{Type: "reinstall", OS: os}
 
 	return s.client.DoRequest("POST", path, action, nil)
 }
